@@ -1,0 +1,3 @@
+[submodule "ltx"]
+	path = ltx
+	url = http://github.com/astro/ltx.git
