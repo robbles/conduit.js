@@ -5,20 +5,20 @@ plugins = {
         command: 'node',
         args: [here + '/plugins/echo.js'],
     },
-    echo2: {
-        command: 'node',
-        args: [here + '/plugins/echo.js'],
-    },
 };
 
 // Add XMPP accounts here
 accounts = {
-    'turk-platform-1@jabber.iitsp.com': {
-        username: 'turk-platform-1',
+    'turk-platform-1': {
+        jid: 'turk-platform-1@jabber.iitsp.com',
         password: 'password',
         server: 'jabber.iitsp.com',
-        secure: true,
     }
 }
+
+routing = {
+
+};
+
 
 
