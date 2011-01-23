@@ -17,7 +17,7 @@ try {
 
 /* external libraries */
 var _ = require('./underscore');
-//require.paths.push(path.join(__dirname, 'lib'));
+require.paths.push(path.join(__dirname, 'lib'));
 var xmpp = require('node-xmpp');
 
 var default_config = 'config.js';
@@ -99,7 +99,7 @@ Plugin.prototype.sendMessage = function(message) {
  */
 Plugin.prototype.receiveStdout = function(data) {
     this.debug('stdout: received a ' + typeof data + ' of length ' + data.length);
-    this.debug(util.inspect(data));
+    //this.debug(util.inspect(data));
 
     // Split into chunks and check if last chunk is complete
     var chunks = data.split(linebreak);
@@ -172,7 +172,11 @@ var XMPPConnection = function(jid, username, password, server) {
         this.debug("yeahhhhh we're online, baby!");
 
         this.con.send(
-            new xmpp.Element('presence', { type: 'chat'}).
+
+            // TODO: figure out how to send presence for each resource
+            new xmpp.Element('presence', { type: 'chat',
+                    //from: 'turk-platform-1@jabber.iitsp.com/resource'
+                }).
                 c('show').t('chat').up().
                 c('status').t('Send me yo messages, foos')
         );
@@ -182,10 +186,12 @@ var XMPPConnection = function(jid, username, password, server) {
     }, this));
 
     this.con.on('stanza', _.bind(function(stanza) {
-        this.debug("we received some shit: " + stanza);
+        this.debug("we received some shit: ");
+        //this.debug(util.inspect(stanza));
+        //this.debug(stanza);
 
           if (stanza.is('message') && stanza.attrs.type !== 'error') {
-              this.emit('message', stanza.getChildText('body'));
+              this.emit('message', stanza);
           }
 
     }, this));
@@ -193,6 +199,7 @@ var XMPPConnection = function(jid, username, password, server) {
     this.con.on('error', _.bind(function(error) {
         this.debug("its all going sideways: " + error);
     }, this));
+
 };
 
 sys.inherits(XMPPConnection, EventEmitter);
@@ -210,23 +217,73 @@ XMPPConnection.prototype.debug = function(msg) {
  * Routes messages between connections (XMPP) and plugins (process
  * stdin/stdout)
  */
-var Router = function(connections, plugins, rules) {
+var Router = function(connections, plugins, routing) {
     var self = this;
     this.connections = connections;
     this.plugins = plugins;
-    this.rules = rules;
+    this.routing = routing;
 
     _.each(connections, function(con) {
         con.on('message', function(message) {
             self.debug('new message from connection: ' + message);
+
+            self.routeIn(message);
         });
     });
 
     _.each(plugins, function(plugin) {
         plugin.on('message', function(message) {
             self.debug('new message from plugin: ' + message);
+
+            self.routeOut(message);
         });
     });
+};
+
+/*
+ * Called to route messages from connections
+ */
+Router.prototype.routeIn = function(msg) {
+    var action = this.routing.default;
+    var plugin = this.getResource(msg);
+
+    this.debug('routing message to "' + plugin + '"');
+
+    var allow = this.routing.allow || [];
+    var deny = this.routing.deny || [];
+    var message = this.routing.message || [];
+    var webhook = this.routing.webhook || [];
+
+    _.each(allow, function(rule) {
+        
+    }, this);
+
+    _.each(deny, function(rule) {
+
+    }, this);
+
+    _.each(message, function(rule) {
+
+    }, this);
+
+    _.each(webhook, function(rule) {
+
+    }, this);
+
+    if(plugin && action === 'allow') {
+        // Extract message body and send to plugin
+        var data = msg.getChildText('body');
+        this.debug('sending message to plugin...');
+        this.plugins[plugin].sendMessage(data);
+        this.plugins[plugin].sendMessage('testing');
+
+    }
+};
+
+/*
+ * Called to route messages from plugins
+ */
+Router.prototype.routeOut = function(msg) {
 };
 
 /*
@@ -236,6 +293,14 @@ Router.prototype.debug = function(msg) {
     util.debug(['[ Router ]', msg].join(' '));
 };
 
+/*
+ * Extracts the resource from a message
+ */
+Router.prototype.getResource = function(msg) {
+    var to = msg.attrs.to || 'unknown';
+    var jid = new xmpp.JID(to);
+    return jid.resource || '/';
+};
 
 
 /*
@@ -300,15 +365,14 @@ var main = function(argv) {
         var plugin = new Plugin(id, pspec.command, pspec.args, pspec.env, configDir);
         plugins[id] = plugin;
         plugin.start();
-        
-        // Poke at child process
+
         setTimeout(function() {
-            console.log('Writing to child...');
-            plugin.sendMessage('hello');
-        }, 1000);
+            plugin.sendMessage('testing');
+        }, 5000);
+        
     });
 
-    var router = new Router(connections, plugins, config.rules);
+    var router = new Router(connections, plugins, config.routing);
     
 }
 
