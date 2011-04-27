@@ -1,0 +1,9 @@
+{
+    "name": "conduit",
+    "version": "0.0.1",
+    "dependencies": {
+        "underscore": "*",
+        "node-xmpp": ">=0.2.6",
+        "optimist": "*"
+    }
+}
