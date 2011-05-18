@@ -13,6 +13,11 @@ accounts = {
         jid: 'turk-platform-1@jabber.iitsp.com',
         password: 'password',
         server: 'jabber.iitsp.com',
+    },
+    'conduit': {
+        jid: 'conduit@xabber.de',
+        password: 'password',
+        server: 'conduit@xabber.de',
     }
 }
 

@@ -1,3 +1,0 @@
-[submodule "lib/node-expat"]
-	path = lib/node-expat
-	url = https://github.com/astro/node-expat.git
