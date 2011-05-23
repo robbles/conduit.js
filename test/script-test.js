@@ -3,60 +3,7 @@
 var vows = require('vows'),
 assert = require('assert'),
 path = require('path'),
-EventEmitter = require('events').EventEmitter,
 conduit = require('../conduit');
-
-/* Use to check if a signal is called, with a error timeout in ms */
-var expectEvent = function(signal, timeout) {
-    return {
-        topic: function(i) {
-            var timer = setTimeout(this.callback, timeout, true);
-            i.on(signal, clearTimeout, timer);
-            i.on(signal, this.callback);
-        },
-        '': function(err) {
-            assert.isUndefined(err, 'Timeout waiting for callback');
-        }
-    };
-};
-
-vows.describe('Components').addBatch({
-    'A Component class': {
-        topic: function() { return conduit.Component },
-
-        'has an array of known options': function(Component) {
-            assert.instanceOf(Component.prototype.options, Array);
-        },
-
-        'rejects options not in the list': function(Component) {
-            assert.throws(function() {
-                new Component({monkey: 'banana'});
-            }, Error);
-        },
-
-        'created with no options': {
-            topic: function() { return new conduit.Component() },
-
-            'is a subclass of EventEmitter': function (component) {
-                assert.instanceOf(component, EventEmitter);
-            },
-            'generates an ID': function(component) {
-                assert.notEqual(component.id, null);
-            },
-            'has a unique ID': function(component) {
-                var c2 = new conduit.Component();
-                assert.notStrictEqual(component.id, c2.id);
-            },
-        },
-        'created with a given ID': {
-            topic: function() { return new conduit.Component({id:'42'}) },
-
-            'uses the given ID': function(component) {
-                assert.strictEqual(component.id, '42');
-            },
-        },
-    }
-}).exportTo(module)
 
 vows.describe('Scripts').addBatch({
     'The Script constructor': {
@@ -66,15 +13,26 @@ vows.describe('Scripts').addBatch({
             assert.throws(function() { new C(); }, Error);
         },
 
-        'accepts the options id, args, env, cwd, encoding': function(C) {
+        'accepts the options id, args, env, cwd, encoding, restart': function(C) {
             // check options list
-            ['id', 'args', 'env', 'cwd', 'encoding'].forEach(function(opt) {
+            ['id', 'args', 'env', 'cwd', 'encoding', 'restart'].forEach(function(opt) {
                 assert.include(C.prototype.options, opt);
             });
+            assert.length(C.prototype.options, 6);
 
             // try all options just to be safe
-            new C('echo', {id:'1', args:[], env:{}, cwd:'.', encoding:'utf8'});
-        }
+            new C('echo', {id:'1', args:[], env:{}, cwd:'.', 
+                           encoding:'utf8', restart: 1});
+        },
+
+        'throws a helpful TypeError when new keyword is omitted': function(C) {
+            assert.throws(function() { C(); }, TypeError);
+
+            try { C() } catch(err) {
+                assert.match(err.message, /new/);
+                assert.match(err.message, /keyword/);
+            }
+        },
     },
 
     'A Script with a command and no options': {
@@ -85,13 +43,16 @@ vows.describe('Scripts').addBatch({
         },
         'uses an empty array for the default args': function(i) {
             assert.instanceOf(i.args, Array);
-            assert.equal(i.args.length, 0);
+            assert.strictEqual(i.args.length, 0);
         },
         'uses the process environment for the default env': function(i) {
-            assert.equal(i.env, process.env);
+            assert.strictEqual(i.env, process.env);
         },
         'uses the location of the script as the working directory': function(i) {
-            assert.equal(i.cwd, path.dirname(__dirname));
+            assert.strictEqual(i.cwd, path.dirname(__dirname));
+        },
+        'uses false as the default restart value': function(i) {
+            assert.strictEqual(i.restart, false);
         },
         'automatically starts a process': function(i) {
             assert.notStrictEqual(typeof i.process, 'undefined');
@@ -154,6 +115,29 @@ vows.describe('Scripts').addBatch({
                 assert.strictEqual(new Buffer(msg, 'base64').toString(), 'input');
             }
         }
+    },
+
+    'A Script with a restart timeout': {
+        topic: function() { 
+            // will stop immediately
+            return new conduit.Script('cat', { restart: 10 });
+        },
+        'starts a process': function(script) {
+            assert.isNumber(script.process.pid);
+        },
+        'when stopped': {
+            topic: function(script) {
+                script.pid_original = script.process.pid;
+                var callback = this.callback;
+                setTimeout(this.callback, 20, script);
+                script.process.kill()
+            },
+            'starts a new process after a short timeout': function(script) {
+                assert.isNumber(script.process.pid);
+                assert.notStrictEqual(script.pid_original, script.process.pid);
+            }
+        }
     }
 }).exportTo(module, {error: false});
+
 
