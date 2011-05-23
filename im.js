@@ -70,7 +70,7 @@ XMPP.prototype.debug = function(msg) {
 };
 
 XMPP.prototype.toString = function() {
-    return ['[XMPP', this.jid, ']'].join(' ');
+    return ['[XMPP ', this.jid, ']'].join('');
 };
 
 

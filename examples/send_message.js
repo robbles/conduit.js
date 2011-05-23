@@ -1,31 +1,44 @@
-var sys = require('sys');
-var argv = process.argv;
+/**
+ * Sends an XMPP chat message to another user. 
+ * Uses the node-xmpp library from
+ * https://github.com/astro/node-xmpp or available from npm as "node-xmpp".
+ *
+ */
 
 var xmpp = require('node-xmpp');
 
-if (argv.length < 6) {
-    sys.puts('Usage: node send_message.js <my-jid> <my-password> <my-text> <jid1> [jid2] ... [jidN]');
+// Credentials for the XMPP account to send from
+var jid = 'example_sender@jabber.org';
+var password = 'password';
+
+// Message to send
+var to = "example_receiver@jabber.org";
+var body = "Hello!";
+
+// Constructs a message stanza and sends using the given XMPP client
+var sendMessage = function(client, to, body) {
+    var msg = new xmpp.Element('message', {
+        to: to, 
+        type: 'chat'
+    }).c('body').t(body);
+
+    client.send(msg);
+};
+
+// Create an XMPP client
+var client = new xmpp.Client({ jid: jid, password: password });
+
+// Send message once connection is established
+client.addListener('online', function() {
+    sendMessage(client, to, body);
+
+    // Shut down client after sending message
+    client.end();
+});
+
+// Error handling
+client.addListener('error', function(e) {
+    console.error('Error sending message: ' + e);
     process.exit(1);
-}
+});
 
-var cl = new xmpp.Client({ jid: argv[2],
-                           password: argv[3] });
-cl.addListener('online',
-               function() {
-                   argv.slice(5).forEach(
-                       function(to) {
-                           cl.send(new xmpp.Element('message',
-                                                    { to: to,
-                                                      type: 'chat'}).
-                                   c('body').
-                                   t(argv[4]));
-                       });
-
-                   // nodejs has nothing left to do and will exit
-                   cl.end();
-               });
-cl.addListener('error',
-               function(e) {
-                   sys.puts(e);
-                   process.exit(1);
-               });

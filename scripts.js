@@ -129,7 +129,7 @@ Script.prototype.debug = function(msg) {
 };
 
 Script.prototype.toString = function() {
-    return ['[Script', this.id, ']'].join(' ');
+    return ['[Script ', this.id, ']'].join('');
 };
 
 var linebreak = '\n';
