@@ -10,10 +10,10 @@ vows.describe('XMPP').addBatch({
     'The XMPP constructor': {
         topic: function() { return conduit.XMPP },
 
-        'accepts the options jid, password, port, host, autoconnect': function(C) {
+        'accepts the options jid, password, port, host, reconnect': function(C) {
 
             // check options list
-            ['id', 'jid', 'password', 'port', 'host', 'autoconnect'].forEach(function(opt) {
+            ['id', 'jid', 'password', 'port', 'host', 'reconnect'].forEach(function(opt) {
                 assert.include(C.prototype.options, opt);
             });
             assert.length(C.prototype.options, 6);
@@ -24,7 +24,7 @@ vows.describe('XMPP').addBatch({
                 password:'pass',
                 port:800,
                 host:'4626e38c-a9e8-4df9-9bbe-c57c504cd11f.com',
-                autoconnect:false
+                reconnect:5
             });
         },
 
@@ -48,16 +48,52 @@ vows.describe('XMPP').addBatch({
             assert.instanceOf(i, conduit.Component);
         },
 
+        'defaults to false for reconnect option': function(i) {
+            assert.strictEqual(i.reconnect, false);
+        },
+
         'emits online as emitted by the underlying connection': testutil.expectEvent('online', 1000, 
-            function(i) { i.conn.emit('online') }),
+            function(i) { i.connection.emit('online') }),
 
         'emits stanza as emitted by the underlying connection': testutil.expectEvent('stanza', 1000, 
-            function(i) { i.conn.emit('stanza', new xmpp.XML.Element('fake')) }),
+            function(i) { i.connection.emit('stanza', new xmpp.XML.Element('fake')) }),
 
         'emits error as emitted by the underlying connection': testutil.expectEvent('error', 1000, 
-            function(i) { i.conn.emit('error', 'message') })
+            function(i) { i.connection.emit('error', 'message') }),
 
+        'if reconnect is false': {
+            topic: function(i) {
+                // force error condition
+                i.connection.emit('error', 'message');
+                setTimeout(this.callback, 10, i, i.connection);
+            },
+
+            'does not reconnect automatically': function(i, lastconn) {
+                // make sure connection hasn't changed
+                assert.strictEqual(i.connection, lastconn);
+            }
+        }
+    },
+
+    'A XMPP with reconnect = [a number]': {
+        topic: function() { 
+            var timeout = 10;
+
+            var xmpp = new conduit.XMPP({
+                jid: 'example@test.com',
+                password: 'password',
+                reconnect: timeout
+            });
+            var first_conn = xmpp.connection;
+
+            setTimeout(this.callback, timeout, xmpp, first_conn);
+        },
+
+        'reconnects after an error condition': function(xmpp, first_conn) {
+            assert.notStrictEqual(this.first_conn, xmpp);
+        }
     }
+
 
 }).exportTo(module, {error: false});
 

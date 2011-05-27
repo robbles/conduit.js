@@ -51,7 +51,25 @@ vows.describe('Components').addBatch({
                 assert.strictEqual(component.id, '42');
             },
         },
+    },
+
+    'the objectSlice function': {
+        topic: function() {
+            this.original = {'a': 10, 'b':20, 'c':30};
+            return conduit.objectSlice(this.original, ['a', 'c']); 
+        },
+
+        'returns a new object': function(o) {
+            assert.notStrictEqual(o, this.original);
+        },
+
+        'returns an object with the keys given in an array': function(o) {
+            assert.strictEqual(o.a, this.original.a);
+            assert.include(o.c, this.original.c);
+            assert.isUndefined(o.b);
+        }
     }
+
 }).exportTo(module)
 
 

@@ -103,7 +103,7 @@ Script.prototype.receiveStderr = function(data) {
     // Split up lines and treat as debug statements
     $.each(data.split(linebreak), function(line) {
         if(line) {
-            this.debug('stderr: ' + line);
+            this.debug(line);
             this.emit('debug', data);
         }
     }, this);

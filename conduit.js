@@ -8,10 +8,40 @@ var fs = require('fs'),
 /* external libraries */
 var $ = require('underscore');
 
+/**
+ * Singleton object for options and top-level event handling
+ */
+var _conduit = {
+    debug: false
+};
 
+exports.initialize = function(opt) {
+    if(typeof opt.error === 'function') {
+        process.on('uncaughtException', error);
+    }
+    if(opt.invincible === true) {
+        process.on('uncaughtException', exports.handleError);
+    }
+
+    _conduit.debug = $(opt.debug).isUndefined()? _conduit.debug : opt.debug;
+
+    return _conduit;
+};
+
+/**
+ * Default top-level error handler
+ */
+exports.handleError = function(err) {
+    console.error(err.stack);
+};
+
+
+/**
+ * Base class for all unique, event-driven components (Script, XMPP, etc.)
+ */
 var Component = function(opt) {
 
-    // Allow omission of new keyword
+    // Throw error when new keyword is not used
     if (!(this instanceof Component))
         throw new TypeError('Must be created with the "new" keyword');
     
@@ -51,11 +81,19 @@ Component.prototype.createUUID = function() {
     s[12] = 4;  // bits 12-15 of the time_hi_and_version field to 0010
     s[16] = ((s[16] & 3) | 8).toString(16);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
     return "i-" + s.join("");
-}
+};
 
 Component.extendOptions = function(base, cls, opt) {
     cls.prototype.options = base.prototype.options.slice();
     [].push.apply(cls.prototype.options, opt);
+};
+
+exports.objectSlice = function(object, keys) {
+    var sliced = {};
+    $(keys).each(function(key) {
+        sliced[key] = object[key];
+    });
+    return sliced;
 }
 
 exports.Script = require('./scripts').Script;
