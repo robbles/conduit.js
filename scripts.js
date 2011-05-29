@@ -18,7 +18,7 @@ var Script = function(command, opt) {
     // options
     opt = opt || {};
     this.args = opt.args || [];
-    this.env = opt.env || process.env;
+    this.env = $(process.env).extend(opt.env);
     this.cwd = opt.cwd || __dirname;
     this.encode = encoder(opt.encoding || 'utf-8');
     this.decode = decoder(opt.encoding || 'utf-8');

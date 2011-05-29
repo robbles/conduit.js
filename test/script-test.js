@@ -64,14 +64,17 @@ vows.describe('Scripts').addBatch({
     'A Script with a command and options object': {
         topic: function() { 
             return new conduit.Script('echo', {
-                'args':['args'], 'env':{}, 'cwd':'/'
+                'args':['args'], 'env':{'EXTENDED':'123456789'}, 'cwd':'/'
             });
         },
         'sets the argument list': function(i) {
             assert.include(i.args, 'args');
         },
-        'sets the environment': function(i) {
-            assert.isEmpty(i.env);
+        'extends the environment': function(i) {
+            // check to make sure PATH is still present
+            assert.strictEqual(i.env.PATH, process.env.PATH);
+            // make sure new value made it in too
+            assert.strictEqual(i.env.EXTENDED, '123456789');
         },
         'sets the working directory': function(i) {
             assert.strictEqual(i.cwd, '/');
