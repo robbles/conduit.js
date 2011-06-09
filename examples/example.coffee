@@ -5,13 +5,41 @@ conduit.initialize
     debug: true
     invincible: true
 
-# Start echo plugin
+# Start echo script
 echo = new conduit.Script 'node'
     id: 'echo'
     args: ['./examples/scripts/echo.js']
     encoding: 'utf8'
     
-#setInterval (() -> echo.sendMessage 'yo!'), 1000
+# Start clock time controller
+clock = new conduit.Script './examples/scripts/clock.py'
+    id: 'clock'
+    restart: 1000
+    env:
+        SLEEP_TIME: 10
+
+# Start XBee script
+xbee = new conduit.Script './examples/scripts/xbee_interface.py'
+    id: 'xbee'
+    restart: 3000
+    env:
+        PORT: '/dev/tty.usbserial-*'
+        LOGGING: 'INFO'
+
+# Set clock time
+clock.on 'message', (message) ->
+    console.log 'Setting clock time with message ' + message
+
+    command = JSON.stringify
+        action: 'send'
+        address: '\x00\x13\xa2\x00\x40\x52\xda\x9a'
+        data: message
+
+    xbee.sendMessage command
+
+xbee.on 'message', (message) ->
+    parsed = JSON.parse(message)
+    console.log 'Received an XBee frame of type ' + parsed.id.toUpperCase()
 
 # Routing output from plugin
 echo.on 'message', (message) ->
