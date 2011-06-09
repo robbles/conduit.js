@@ -51,7 +51,7 @@ var Component = function(opt) {
     this.checkOptions(opt);
 
     // Generate id if needed
-    this.id = opt.id || this.createUUID();
+    this.id = opt.id || $.uniqueId();
     delete opt.id;
 };
 
@@ -67,22 +67,6 @@ Component.prototype.checkOptions = function(opt) {
     }
 };
 
-/*
- * Taken from RaphaelJS.
- * Copyright (c) 2010 Dmitry Baranovskiy (http://raphaeljs.com)
- */
-Component.prototype.createUUID = function() {
-    // http://www.ietf.org/rfc/rfc4122.txt
-    var s = [],
-        i = 0;
-    for (; i < 32; i++) {
-        s[i] = (~~(Math.random() * 16)).toString(16);
-    }
-    s[12] = 4;  // bits 12-15 of the time_hi_and_version field to 0010
-    s[16] = ((s[16] & 3) | 8).toString(16);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
-    return "i-" + s.join("");
-};
-
 Component.extendOptions = function(base, cls, opt) {
     cls.prototype.options = base.prototype.options.slice();
     [].push.apply(cls.prototype.options, opt);
@@ -96,6 +80,14 @@ exports.objectSlice = function(object, keys) {
     return sliced;
 }
 
-exports.Script = require('./scripts').Script;
-exports.XMPP = require('./im').XMPP;
+var scripts = require('./scripts');
+exports.scripts = scripts;
+exports.Script = scripts.Script;
+
+exports.tobase64 = scripts.encoder('base64');
+exports.frombase64 = scripts.decoder('base64');
+
+var im = require('./im');
+exports.im = im;
+exports.XMPP = im.XMPP;
 

@@ -146,3 +146,6 @@ var encoder = function(encoding) {
     };
 };
 
+exports.decoder = decoder;
+exports.encoder = encoder;
+
