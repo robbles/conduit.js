@@ -11,22 +11,62 @@
       background-color: #556270;
       font-family: Helvetica, Arial, FreeSans, san-serif;
       color: #FFF;
+      text-shadow: 1px 1px 1px #555;
+      background-image: url('noise.png');
     }
     #container {
       margin: 0 auto;
       width: 700px;
+      box-shadow: inset 0 0 6px #444, 0 0 10px #666;
+      padding: 10px 30px;
+      margin-top: -40px;
+      margin-bottom: -10px;
+      background-color: rgba(0,0,0,0.1);
     }
-    h1 { font-size: 3.8em; color: #de3d02; margin-bottom: 3px; }
+    a { text-shadow: none; }
+    p a, li a, .footer a { 
+        color: #333;
+        text-decoration: none;
+    }
+    a:hover { 
+        text-decoration: underline;
+    }
+    h1 { 
+        font-size: 3.8em;
+        color: #de3d02;
+        margin-bottom: 3px;
+        font-family: KarnivoreRegular;
+        font-weight: normal;
+    }
     h1 .small { font-size: 0.4em; }
-    h1 a { text-decoration: none }
+    h1 a {
+        text-decoration: none !important;
+        text-shadow: 1px 1px 1px #444, 0px 0px 1px rgba(255,255,255,0.5);
+    }
+    h2,h3 { text-shadow: 1px 1px 1px #555; }
     h2 { font-size: 1.5em; color: #de3d02; }
     h3 { text-align: center; color: #de3d02; }
     a { color: #de3d02; }
     .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
+    .download { 
+        float: right;
+        margin-top: 24px;
+    }
     pre { background: #000; color: #fff; padding: 15px;}
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
+
+    @font-face {
+        font-family: 'KarnivoreRegular';
+        src: url('fonts/KARNIVOR-webfont.eot');
+        src: url('fonts/KARNIVOR-webfont.eot?#iefix') format('embedded-opentype'),
+        url('fonts/KARNIVOR-webfont.woff') format('woff'),
+        url('fonts/KARNIVOR-webfont.ttf') format('truetype'),
+        url('fonts/KARNIVOR-webfont.svg#KarnivoreRegular') format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+
   </style>
 </head>
 
@@ -47,15 +87,14 @@
     <div class="description">A library for protocol glue code and distributed systems</div>
 
     <h2>Dependencies</h2>
-<p>- node-xmpp: github.com/astro/node-xmpp
-- underscore: github.com/documentcloud/underscore</p>
+    <ul>
+        <li><a href="http://github.com/astro/node-xmpp">node-xmpp</a></li>
+        <li><a href="http://github.com/documentcloud/underscore">underscore</a></li>
+    </ul>
 <h2>License</h2>
 <p>GPLv3</p>
 <h2>Authors</h2>
-<p>Rob O'Dwyer (odwyerrob@gmail.com)</p>
-<h2>Contact</h2>
-<p>Rob O'Dwyer (odwyerrob@gmail.com)<br/>      </p>
-
+<p>Rob O'Dwyer (odwyerrob[ at ]gmail.com)</p>
 
     <h2>Download</h2>
     <p>

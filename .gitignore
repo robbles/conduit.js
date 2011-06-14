@@ -1,2 +1,4 @@
 node_modules/
 evrythng
+.livereload
+.DS_Store
