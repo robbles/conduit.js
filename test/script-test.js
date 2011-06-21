@@ -14,14 +14,12 @@ vows.describe('Scripts').addBatch({
         },
 
         'accepts the options id, args, env, cwd, encoding, restart': function(C) {
+
             // check options list
-            ['id', 'args', 'env', 'cwd', 'encoding', 'restart'].forEach(function(opt) {
-                assert.include(C.prototype.options, opt);
-            });
-            assert.length(C.prototype.options, 6);
+            assert.deepEqual(C.prototype.options, ['id', 'args', 'env', 'cwd', 'encoding', 'restart']);
 
             // try all options just to be safe
-            new C('echo', {id:'1', args:[], env:{}, cwd:'.', 
+            new C('/bin/echo', {id:'1', args:[], env:{}, cwd:'.', 
                            encoding:'utf8', restart: 1});
         },
 
@@ -48,8 +46,8 @@ vows.describe('Scripts').addBatch({
         'uses the process environment for the default env': function(i) {
             assert.strictEqual(i.env, process.env);
         },
-        'uses the location of the script as the working directory': function(i) {
-            assert.strictEqual(i.cwd, path.dirname(__dirname));
+        'uses the global cwd as the working directory': function(i) {
+            assert.strictEqual(i.cwd, conduit._config.cwd);
         },
         'uses false as the default restart value': function(i) {
             assert.strictEqual(i.restart, false);
@@ -63,7 +61,7 @@ vows.describe('Scripts').addBatch({
 
     'A Script with a command and options object': {
         topic: function() { 
-            return new conduit.Script('echo', {
+            return new conduit.Script('bin/echo', {
                 'args':['args'], 'env':{'EXTENDED':'123456789'}, 'cwd':'/'
             });
         },
@@ -79,6 +77,9 @@ vows.describe('Scripts').addBatch({
         'sets the working directory': function(i) {
             assert.strictEqual(i.cwd, '/');
         },
+        'sets the command relative to the working directory': function(i) {
+            assert.strictEqual(i.command, '/bin/echo');
+        },
         'when emitting a message': {
             topic: function(i) {
                 i.on('message', this.callback);
@@ -92,7 +93,7 @@ vows.describe('Scripts').addBatch({
         topic: function() { 
             return function() {
                 // will echo back anything written to it
-                return new conduit.Script('cat', { encoding: 'base64' });
+                return new conduit.Script('/bin/cat', { encoding: 'base64' });
             };
         },
         'when emitting a message': {
@@ -123,7 +124,7 @@ vows.describe('Scripts').addBatch({
     'A Script with a restart timeout': {
         topic: function() { 
             // will stop immediately
-            return new conduit.Script('cat', { restart: 10 });
+            return new conduit.Script('/bin/cat', { restart: 10 });
         },
         'starts a process': function(script) {
             assert.isNumber(script.process.pid);

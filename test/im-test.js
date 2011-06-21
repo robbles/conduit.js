@@ -13,10 +13,7 @@ vows.describe('XMPP').addBatch({
         'accepts the options jid, password, port, host, reconnect': function(C) {
 
             // check options list
-            ['id', 'jid', 'password', 'port', 'host', 'reconnect'].forEach(function(opt) {
-                assert.include(C.prototype.options, opt);
-            });
-            assert.length(C.prototype.options, 6);
+            assert.deepEqual(C.prototype.options, ['id', 'jid', 'password', 'port', 'host', 'reconnect']);
 
             // try all options just to be safe
             new C({
@@ -52,13 +49,13 @@ vows.describe('XMPP').addBatch({
             assert.strictEqual(i.reconnect, false);
         },
 
-        'emits online as emitted by the underlying connection': testutil.expectEvent('online', 1000, 
+        'emits online when emitted by the underlying connection': testutil.expectEvent('online', 1000, 
             function(i) { i.connection.emit('online') }),
 
-        'emits stanza as emitted by the underlying connection': testutil.expectEvent('stanza', 1000, 
+        'emits stanza when emitted by the underlying connection': testutil.expectEvent('stanza', 1000, 
             function(i) { i.connection.emit('stanza', new xmpp.XML.Element('fake')) }),
 
-        'emits error as emitted by the underlying connection': testutil.expectEvent('error', 1000, 
+        'emits error when emitted by the underlying connection': testutil.expectEvent('error', 1000, 
             function(i) { i.connection.emit('error', 'message') }),
 
         'if reconnect is false': {

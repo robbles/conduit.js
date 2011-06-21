@@ -1,25 +1,26 @@
 
 conduit = require '../conduit'
 
-conduit.initialize
+conduit.configure
     debug: true
     invincible: true
+    cwd: __dirname
 
 # Start echo script
 echo = new conduit.Script 'node'
     id: 'echo'
-    args: ['./examples/scripts/echo.js']
+    args: ['./scripts/echo.js']
     encoding: 'utf8'
     
 # Start clock time controller
-clock = new conduit.Script './examples/scripts/clock.py'
+clock = new conduit.Script './scripts/clock.py'
     id: 'clock'
     restart: 1000
     env:
         SLEEP_TIME: 10
 
 # Start XBee script
-xbee = new conduit.Script './examples/scripts/xbee_interface.py'
+xbee = new conduit.Script './scripts/xbee_interface.py'
     id: 'xbee'
     restart: 3000
     env:

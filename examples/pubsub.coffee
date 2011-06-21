@@ -1,10 +1,10 @@
 conduit = require '../conduit'
 Element = conduit.im.XML.Element
 
-conduit.initialize
+conduit.configure
     debug: true
     invincible: true
-
+    cwd: __dirname
 
 # Set up XMPP client
 xmpp = new conduit.XMPP

@@ -52,6 +52,8 @@ class XBeeInterface(object):
     def run(self):
         # Send an AT command to trigger a response from the module
         self.xbee.at(command='NI')
+        response = self.xbee.wait_read_frame()
+        log.info('Network identifier is "%s"', response['parameter'])
 
         while True:
             # do non-blocking reading from stdin and serial port
@@ -70,10 +72,12 @@ class XBeeInterface(object):
         """ Read an entire frame from the serial connection and return it """
         try:
             return self.xbee.wait_read_frame()
-        except (SerialException, ValueError) as e:
+        except ValueError as e:
+            log.warning('error in packet data: %s', e)
+            return None
+        except SerialException as e:
             log.error('error reading serial frame: %s', e)
             raise IOError("Error reading from serial port")
-            return None
 
     def read_message(self):
         """ Read a line from stdin and parse it as JSON """
@@ -132,8 +136,8 @@ class XBeeInterface(object):
             log.warning('unhandled frame: %s', frame)
 
     def on_frame_rx(self, frame):
-        log.info('Received message from %s/%s', frame['source_addr_long'],
-                frame['source_addr'])
+        log.info('Received message from %s/%s', hexify(frame['source_addr_long']),
+                hexify(frame['source_addr']))
         self.json_message(frame)
 
     def on_frame_tx_status(self, frame):
@@ -147,10 +151,15 @@ class XBeeInterface(object):
         self.json_message(frame)
 
 
+def hexify(s):
+    """ Turns a binary string into a string of the corresponding hex bytes """
+    return ''.join(('%02X' % ord(c) for c in s))
+
+
 def main(env):
     port = env.get('PORT')
     baud = int(env.get('BAUD', 9600))
-    escaped = env.get('ESCAPE', False) in ('true', 'yes', '1')
+    escaped = env.get('ESCAPE', 'true') in ('true', 'yes', '1')
     log.setLevel(getattr(logging, env.get('LOGGING', 'DEBUG')))
 
     if not port:

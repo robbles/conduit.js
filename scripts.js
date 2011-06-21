@@ -2,7 +2,9 @@ var sys = require('sys'),
     spawn = require('child_process').spawn,
     $ = require('underscore'),
     util = require('util'),
-    Component = require('./conduit').Component;
+    path = require('path'),
+    conduit = require('./conduit'),
+    Component = conduit.Component;
 
 /*
  * Handles child process functionality
@@ -13,16 +15,20 @@ var Script = function(command, opt) {
     if($.isUndefined(command)) {
         throw new Error('No command specified!');
     }
-    this.command = command;
 
     // options
     opt = opt || {};
     this.args = opt.args || [];
     this.env = $(process.env).extend(opt.env);
-    this.cwd = opt.cwd || __dirname;
+    this.cwd = opt.cwd || conduit._config.cwd;
     this.encode = encoder(opt.encoding || 'utf-8');
     this.decode = decoder(opt.encoding || 'utf-8');
     this.restart = parseInt(opt.restart, 10) || false;
+
+    this.command = path.resolve(this.cwd, command);
+    if(!path.existsSync(this.command)) {
+        throw new Error('Script not found: ' + this.command);
+    }
 
     this.start();
 };

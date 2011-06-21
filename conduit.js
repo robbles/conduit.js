@@ -11,22 +11,31 @@ var $ = require('underscore');
 /**
  * Singleton object for options and top-level event handling
  */
-var _conduit = {
-    debug: false
+var _config = {
+    error: null,
+    invincible: false,
+    debug: false,
+    cwd: '.'
 };
 
-exports.initialize = function(opt) {
+/*
+ * Configure global options in _config
+ */
+exports.configure = function(opt) {
     if(typeof opt.error === 'function') {
         process.on('uncaughtException', error);
+        _config.error = opt.error;
     }
     if(opt.invincible === true) {
         process.on('uncaughtException', exports.handleError);
+        _config.invincible = true;
     }
 
-    _conduit.debug = $(opt.debug).isUndefined()? _conduit.debug : opt.debug;
-
-    return _conduit;
+    // Replace options given in opt
+    _config.debug = $(opt.debug).isUndefined()? _config.debug : opt.debug;
+    _config.cwd = $(opt.cwd).isUndefined()? _config.cwd : opt.cwd;
 };
+exports._config = _config;
 
 /**
  * Default top-level error handler
@@ -90,4 +99,8 @@ exports.frombase64 = scripts.decoder('base64');
 var im = require('./im');
 exports.im = im;
 exports.XMPP = im.XMPP;
+
+var web = require('./web');
+exports.web = web;
+exports.WebHook = web.WebHook;
 
