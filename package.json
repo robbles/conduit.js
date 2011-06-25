@@ -4,7 +4,7 @@
     "main": "./conduit.js",
     "dependencies": {
         "underscore": "*",
-        "node-xmpp": ">=0.2.6",
+        "node-xmpp": ">=0.2.6"
     },
     "author": { 
         "name": "Rob O'Dwyer",

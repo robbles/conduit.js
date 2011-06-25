@@ -7,9 +7,8 @@ conduit.configure
     cwd: __dirname
 
 # Start echo script
-echo = new conduit.Script 'node'
+echo = new conduit.Script './scripts/echo.js'
     id: 'echo'
-    args: ['./scripts/echo.js']
     encoding: 'utf8'
     
 # Start clock time controller

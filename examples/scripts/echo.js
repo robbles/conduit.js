@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 console.error('process started');
 console.error('current directory is ' + process.cwd());
 

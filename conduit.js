@@ -18,10 +18,31 @@ var _config = {
     cwd: '.'
 };
 
+/* Used for global events */
+var _hub = new EventEmitter();
+
+// FIXME
+exports.on = function(type, listener) {
+    return _hub.on(type, listener);
+};
+
+// FIXME
+exports.emit = function() {
+    return _hub.emit.apply(arguments);
+};
+
 /*
  * Configure global options in _config
  */
-exports.configure = function(opt) {
+exports.configure = function(opt, reconfigure) {
+    // Don't redo unless reconfigure is true
+    if(reconfigure !== true) {
+        if(process.env.CONDUIT_CONFIGURED === 'true') {
+            return;
+        }
+        process.env.CONDUIT_CONFIGURED = 'true';
+    }
+
     if(typeof opt.error === 'function') {
         process.on('uncaughtException', error);
         _config.error = opt.error;
