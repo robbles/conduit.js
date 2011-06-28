@@ -28,7 +28,7 @@ exports.on = function(type, listener) {
 
 // FIXME
 exports.emit = function() {
-    return _hub.emit.apply(arguments);
+    return _hub.emit.apply(_hub, arguments);
 };
 
 /*
